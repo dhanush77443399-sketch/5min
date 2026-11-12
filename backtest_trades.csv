@@ -1,4 +1,0 @@
-pip install yfinance pandas numpy requests
-python orb_backtest.py --demo        # logic check on synthetic data
-python orb_backtest.py               # real run on Nifty 200
-python orb_backtest.py --symbols RELIANCE TCS --rr 1.5 --sl mid
