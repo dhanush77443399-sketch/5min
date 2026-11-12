@@ -1,11 +1,16 @@
 name: ORB Backtest
 
 on:
-  workflow_dispatch:      # gives you a "Run workflow" button in the Actions tab
+  workflow_dispatch:
+    inputs:
+      days:
+        description: "Calendar days of history (1700 = max, Jan 2022)"
+        default: "365"
 
 jobs:
   backtest:
     runs-on: ubuntu-latest
+    timeout-minutes: 350
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -16,12 +21,23 @@ jobs:
           python-version: "3.11"
 
       - name: Install dependencies
-        run: pip install yfinance pandas numpy requests
+        run: pip install pandas numpy requests yfinance
 
-      - name: Run backtest
-        run: python orb_backtest.py
+      - name: Restore data cache
+        uses: actions/cache@v4
+        with:
+          path: data_cache
+          key: candles-${{ github.run_id }}
+          restore-keys: candles-
 
-      - name: Save results
+      - name: Run backtest and send to Telegram
+        env:
+          TG_TOKEN: ${{ secrets.TG_TOKEN }}
+          TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
+        run: python orb_backtest.py --days ${{ github.event.inputs.days }} --telegram
+
+      - name: Save results file
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: backtest-results
