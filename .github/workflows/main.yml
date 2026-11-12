@@ -1,0 +1,28 @@
+name: ORB Backtest
+
+on:
+  workflow_dispatch:      # gives you a "Run workflow" button in the Actions tab
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install yfinance pandas numpy requests
+
+      - name: Run backtest
+        run: python orb_backtest.py
+
+      - name: Save results
+        uses: actions/upload-artifact@v4
+        with:
+          name: backtest-results
+          path: backtest_trades.csv
